@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,8 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @WebFluxTest(BeerController.class)
 class BeerControllerTest {
@@ -84,20 +87,22 @@ class BeerControllerTest {
                 .value(beerDto -> beerDto.getBeerName(), equalTo(validBeer.getBeerName()));
     }
 
+    @Test
+    void saveBeer(){
+        when(beerService.saveNewBeer(any(BeerDto.class))).thenReturn(validBeer);
+        webTestClient.post()
+                .uri("/api/v1/beer")
+                .body(BodyInserters.fromValue(validBeer))
+                .exchange()
+                .expectStatus().isCreated().expectBody(Void.class);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @Test
+    void deleteBeer(){
+        doNothing().when(beerService).deleteBeerById(any(UUID.class));
+        webTestClient.delete()
+                .uri("/api/v1/beer/"+ UUID.randomUUID().toString())
+                .exchange()
+                .expectStatus().isOk().expectBody(Void.class);
+    }
 }

@@ -1,5 +1,6 @@
 package guru.springframework.sfgrestbrewery.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.sfgrestbrewery.bootstrap.BeerLoader;
 import guru.springframework.sfgrestbrewery.services.BeerService;
 import guru.springframework.sfgrestbrewery.web.model.BeerDto;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +43,9 @@ class BeerControllerTest {
                 .beerName("Test beer")
                 .beerStyle("PALE_ALE")
                 .upc(BeerLoader.BEER_1_UPC)
-                .id(UUID.randomUUID())
+                .price(BigDecimal.TEN)
+                 .id(UUID.randomUUID())
+                .quantityOnHand(1000)
                 .build();
     }
 
@@ -89,13 +93,17 @@ class BeerControllerTest {
     }
 
     @Test
-    void saveBeer(){
+    void saveBeer() {
+
         when(beerService.saveNewBeer(any(BeerDto.class))).thenReturn(validBeer);
+        String beerDtoJson =  "{\"beerName\":\"Test beer\",\"beerStyle\":\"PALE_ALE\",\"upc\":\"0631234200036\",\"price\":10,\"quantityOnHand\":1000,\"createdDate\":null,\"lastUpdatedDate\":null}";
         webTestClient.post()
                 .uri("/api/v1/beer")
-                .body(BodyInserters.fromValue(validBeer))
-                .exchange()
-                 .expectBody(Void.class);
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(beerDtoJson))
+                 .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Void.class);
 
     }
 
@@ -107,4 +115,5 @@ class BeerControllerTest {
                 .exchange()
                 .expectStatus().isOk().expectBody(Void.class);
     }
+
 }

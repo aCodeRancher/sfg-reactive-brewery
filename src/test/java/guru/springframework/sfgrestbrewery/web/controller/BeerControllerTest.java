@@ -41,6 +41,7 @@ class BeerControllerTest {
                 .beerName("Test beer")
                 .beerStyle("PALE_ALE")
                 .upc(BeerLoader.BEER_1_UPC)
+                .id(UUID.randomUUID())
                 .build();
     }
 
@@ -94,7 +95,8 @@ class BeerControllerTest {
                 .uri("/api/v1/beer")
                 .body(BodyInserters.fromValue(validBeer))
                 .exchange()
-                .expectStatus().isCreated().expectBody(Void.class);
+                 .expectBody(Void.class);
+
     }
 
     @Test

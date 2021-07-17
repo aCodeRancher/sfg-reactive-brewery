@@ -46,7 +46,6 @@ public class WebClientIT {
                 .retrieve().bodyToMono(BeerPagedList.class);
 
         beerPagedListMono.publishOn(Schedulers.parallel()).subscribe(beerPagedList -> {
-
             beerPagedList.getContent().forEach(beerDto -> System.out.println(beerDto.toString()));
 
             countDownLatch.countDown();
@@ -62,16 +61,14 @@ public class WebClientIT {
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         Mono<BeerPagedList> beerPagedListMono = webClient.get().uri(uriBuilder -> {
-            return uriBuilder.path("/api/v1/beer").queryParam("pageSize", "5").build();
+            return uriBuilder.path("/api/v1/beer").queryParam("beerName", "Galaxy Cat").queryParam("pageSize", "5").build();
         })
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(BeerPagedList.class);
 
-        beerPagedListMono.publishOn(Schedulers.parallel()).subscribe(beerPagedList -> {
-
-            beerPagedList.getContent().forEach(beerDto -> System.out.println(beerDto.toString()));
-
-            countDownLatch.countDown();
+          beerPagedListMono.publishOn(Schedulers.parallel()).subscribe(beerPagedList -> {
+             beerPagedList.getContent().forEach(beerDto -> System.out.println(beerDto.toString()));
+             countDownLatch.countDown();
         });
 
         countDownLatch.await(1000, TimeUnit.MILLISECONDS);

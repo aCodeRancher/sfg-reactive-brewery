@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.reactive.function.server.ServerResponseExtensionsKt;
 import reactor.core.publisher.Mono;
 
 /**
@@ -24,6 +25,15 @@ public class BeerHandlerV2 {
         return beerService.getById(beerId, showInventory)
                 .flatMap(beerDto -> {
                     return ServerResponse.ok().bodyValue(beerDto);
+                }).switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> getBeerByUpc(ServerRequest request){
+        String upc =  request.pathVariable("beerUpc");
+
+        return beerService.getByUpc(upc)
+                .flatMap(beerDto -> {
+                        return ServerResponse.ok().bodyValue(beerDto);
                 }).switchIfEmpty(ServerResponse.notFound().build());
     }
 }

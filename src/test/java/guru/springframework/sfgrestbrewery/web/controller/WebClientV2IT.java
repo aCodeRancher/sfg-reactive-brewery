@@ -42,9 +42,9 @@ public class WebClientV2IT {
     }
 
     @Test
-    void testDeleteBeer() {
+    void testDeleteBeer() throws InterruptedException {
         Integer beerId = 3;
-        CountDownLatch countDownLatch = new CountDownLatch(1);
+        CountDownLatch countDownLatch = new CountDownLatch(2);
 
         webClient.delete().uri("/api/v2/beer/" + beerId )
                 .retrieve().toBodilessEntity()
@@ -59,6 +59,9 @@ public class WebClientV2IT {
         }, throwable -> {
             countDownLatch.countDown();
         });
+
+        countDownLatch.await(500, TimeUnit.MILLISECONDS);
+        assertThat(countDownLatch.getCount()).isEqualTo(0);
     }
 
     @Test

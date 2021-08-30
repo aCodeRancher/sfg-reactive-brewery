@@ -304,6 +304,7 @@ public class WebClientIT {
         assertThat(countDownLatch.getCount()).isEqualTo(0);
     }
 
+    //add my own test for not found beer
     @Test
     void getBeerByIdNotFound() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);

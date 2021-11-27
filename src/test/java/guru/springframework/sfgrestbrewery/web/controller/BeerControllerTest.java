@@ -7,7 +7,10 @@ import guru.springframework.sfgrestbrewery.web.model.BeerPagedList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebFlux;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -21,7 +24,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@WebFluxTest(BeerController.class)
+@SpringBootTest
+@AutoConfigureWebTestClient
 class BeerControllerTest {
 
     @Autowired
@@ -38,6 +42,7 @@ class BeerControllerTest {
                 .beerName("Test beer")
                 .beerStyle("PALE_ALE")
                 .upc(BeerLoader.BEER_1_UPC)
+                .id(123456)
                 .build();
     }
 
@@ -72,11 +77,11 @@ class BeerControllerTest {
 
     @Test
     void getBeerById() {
-        Integer beerId = 1;
+       // Integer beerId = 1;
         given(beerService.getById(any(), any())).willReturn(Mono.just(validBeer));
 
         webTestClient.get()
-                .uri("/api/v1/beer/" + beerId)
+                .uri("/api/v1/beer/" + validBeer.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()

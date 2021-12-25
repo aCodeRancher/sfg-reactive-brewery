@@ -79,8 +79,9 @@ public class BeerController {
     }
 
     @PutMapping("beer/{beerId}")
-    public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Mono<BeerDto>> updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
+        BeerDto updatedBeer = beerService.updateBeer(beerId, beerDto);
+       return ResponseEntity.ok(Mono.just(updatedBeer));
     }
 
     @DeleteMapping("beer/{beerId}")

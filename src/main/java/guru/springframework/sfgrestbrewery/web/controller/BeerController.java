@@ -81,10 +81,10 @@ public class BeerController {
     }
 
     @PutMapping("beer/{beerId}")
-    public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
-        beerService.updateBeer(beerId, beerDto).subscribe();
+    public Mono<ResponseEntity<Void>> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
+       return beerService.updateBeer(beerId, beerDto).map(updatedBeer-> ResponseEntity.noContent().<Void>build())
+                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
 
-        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("beer/{beerId}")

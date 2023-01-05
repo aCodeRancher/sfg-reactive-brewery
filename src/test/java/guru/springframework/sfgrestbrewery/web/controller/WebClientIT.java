@@ -306,20 +306,20 @@ public class WebClientIT {
 
     @Test
     void getBeerByIdNotFound() throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-       Mono<BeerDto> beerDtoMono =
-                webClient.get().uri("api/v1/beer/100")
+        Mono<ResponseEntity> responseEntity  =  webClient.get().uri("api/v1/beer/100")
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(BeerDto.class);
+                .retrieve().bodyToMono(ResponseEntity.class);
+           responseEntity.subscribe(r->assertTrue(r.getStatusCode().equals(HttpStatus.NOT_FOUND)));
 
-        beerDtoMono.subscribe(beer -> {}, throwable -> {
-            assertTrue(throwable.getClass().getName().equals("org.springframework.web.reactive.function.client.WebClientResponseException$NotFound"));
-            countDownLatch.countDown();
-        });
-
-        countDownLatch.await(1000, TimeUnit.MILLISECONDS);
-        assertThat(countDownLatch.getCount()).isEqualTo(0);
     }
+
+    @Test
+    void testDeleteBeerNotFound() throws InterruptedException {
+
+           Mono<ResponseEntity> responseEntity = webClient.delete().uri("/api/v1/beer/" + 100 )
+                            .retrieve().bodyToMono(ResponseEntity.class);
+        responseEntity.subscribe(r->assertTrue(r.getStatusCode().equals(HttpStatus.NOT_FOUND)));
+    }
+
 
 }

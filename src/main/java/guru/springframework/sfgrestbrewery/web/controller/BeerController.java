@@ -65,24 +65,19 @@ public class BeerController {
     }
 
     @PostMapping(path = "beer")
-    public ResponseEntity<Void> saveNewBeer(@RequestBody @Validated BeerDto beerDto){
+    public Mono<ResponseEntity<Void>> saveNewBeer(@RequestBody @Validated final BeerDto beerDto){
 
-        AtomicInteger atomicIntegerBeerId = new AtomicInteger();
-
-        beerService.saveNewBeer(beerDto).subscribe(savedBeerDto -> {
-            atomicIntegerBeerId.set(savedBeerDto.getId());
-        });
-
-        return ResponseEntity
-                .created(UriComponentsBuilder
-                        .fromHttpUrl("http://api.springframework.guru/api/v1/beer/" + atomicIntegerBeerId.get())
-                        .build().toUri())
-                .build();
+        return beerService.saveNewBeer(beerDto)
+                .map(savedBeer-> ResponseEntity
+                        .created(UriComponentsBuilder.fromHttpUrl("http://api.springframework.guru/api/v1/beer/" +
+                                savedBeer.getId().toString()).build().toUri()).build());
     }
 
     @PutMapping("beer/{beerId}")
     public Mono<ResponseEntity<Void>> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
-       return beerService.updateBeer(beerId, beerDto).map(updatedBeer-> ResponseEntity.noContent().<Void>build())
+
+        return beerService.updateBeer(beerId, beerDto)
+                .map(updatedBeer -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
 
     }

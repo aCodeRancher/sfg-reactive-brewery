@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by jt on 3/7/21.
@@ -52,25 +53,12 @@ public class WebClientIT {
                 .price(new BigDecimal("9.99"))
                 .build();
 
-        webClient.put().uri("/api/v1/beer/" + 200 )
+       Mono<ResponseEntity<Void>> responseEntityMono = webClient.put().uri("/api/v1/beer/" + 200 )
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(updatePayload))
-                .retrieve().toBodilessEntity()
-                .subscribe(responseEntity -> {
-                }, throwable -> {
-                    if (throwable.getClass().getName().equals("org.springframework.web.reactive.function.client.WebClientResponseException$NotFound")){
-                        WebClientResponseException ex = (WebClientResponseException) throwable;
+                .retrieve().toBodilessEntity();
+      responseEntityMono.subscribe(r-> assertThat(r.getStatusCode().equals(HttpStatus.NOT_FOUND)));
 
-                        if (ex.getStatusCode().equals(HttpStatus.NOT_FOUND)){
-                            countDownLatch.countDown();
-                        }
-                    }
-                });
-
-        countDownLatch.countDown();
-
-        countDownLatch.await(1000, TimeUnit.MILLISECONDS);
-        assertThat(countDownLatch.getCount()).isEqualTo(0);
     }
 
     @Test

@@ -82,21 +82,11 @@ public class BeerController {
     }
 
     @PutMapping("beer/{beerId}")
-    public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
+    public Mono<ResponseEntity<Void>> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
 
-        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-
-        beerService.updateBeer(beerId, beerDto).subscribe(savedDto -> {
-            if (savedDto.getId() != null) {
-                atomicBoolean.set(true);
-            }
-        });
-
-        if (atomicBoolean.get()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return beerService.updateBeer(beerId, beerDto)
+                .map(updatedBeer -> ResponseEntity.noContent().<Void>build())
+                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
     }
 
     @DeleteMapping("beer/{beerId}")

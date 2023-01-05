@@ -56,19 +56,14 @@ public class BeerController {
     }
 
     @GetMapping("beer/{beerId}")
-    public ResponseEntity<Mono<BeerDto>> getBeerById(@PathVariable("beerId") Integer beerId,
+    public Mono<ResponseEntity<BeerDto>> getBeerById(@PathVariable("beerId") Integer beerId,
                                                     @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand){
         if (showInventoryOnHand == null) {
             showInventoryOnHand = false;
         }
 
-        return ResponseEntity.ok(beerService.getById(beerId, showInventoryOnHand)
-                .defaultIfEmpty(BeerDto.builder().build())
-                .doOnNext(beerDto -> {
-                    if (beerDto.getId() == null){
-                        throw new NotFoundException();
-                    }
-                }));
+        return beerService.getById(beerId, showInventoryOnHand)
+                .map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("beerUpc/{upc}")
@@ -111,11 +106,14 @@ public class BeerController {
     }
 
     @DeleteMapping("beer/{beerId}")
-    public ResponseEntity<Void> deleteBeerById(@PathVariable("beerId") Integer beerId){
+    public Mono<ResponseEntity<Void>> deleteBeerById(@PathVariable("beerId") Integer beerId) {
 
-        beerService.deleteBeerById(beerId);
-
-        return ResponseEntity.ok().build();
+        return beerService.getById(beerId, false)
+                .flatMap(
+                        existingBeer ->
+                                beerService.deleteBeerById(beerId)
+                                        .then(Mono.just(ResponseEntity.noContent().<Void>build())))
+                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
     }
 
 }

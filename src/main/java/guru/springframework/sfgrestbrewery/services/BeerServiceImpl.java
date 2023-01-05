@@ -106,8 +106,9 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public void deleteBeerById(Integer beerId) {
-        beerRepository.deleteById(beerId).subscribe();
+    public Mono<Void> deleteBeerById(Integer beerId) {
+
+       return beerRepository.deleteById(beerId);
     }
 
 

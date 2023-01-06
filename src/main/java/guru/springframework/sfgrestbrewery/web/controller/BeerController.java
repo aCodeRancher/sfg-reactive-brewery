@@ -29,7 +29,7 @@ public class BeerController {
     private final BeerService beerService;
 
     @GetMapping(produces = { "application/json" }, path = "beer")
-    public ResponseEntity<Mono<BeerPagedList>> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+    public Mono<ResponseEntity<BeerPagedList>> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                    @RequestParam(value = "beerName", required = false) String beerName,
                                                    @RequestParam(value = "beerStyle", required = false) BeerStyleEnum beerStyle,
@@ -46,9 +46,9 @@ public class BeerController {
         if (pageSize == null || pageSize < 1) {
             pageSize = DEFAULT_PAGE_SIZE;
         }
-
-        return ResponseEntity.ok(beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand));
-    }
+       Mono<BeerPagedList> listMono = beerService.listBeers(beerName, beerStyle, PageRequest.of(pageNumber, pageSize), showInventoryOnHand);
+       return  listMono.map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+     }
 
     @ExceptionHandler
     ResponseEntity<Void> handleNotFound(NotFoundException ex){

@@ -108,6 +108,20 @@ class BeerControllerTest {
     }
 
     @Test
+    void updateBeer() {
+
+        when(beerService.updateBeer(any(UUID.class), any(BeerDto.class))).thenReturn(validBeer);
+        String beerDtoJson =  "{\"beerName\":\"Test beer\",\"beerStyle\":\"PALE_ALE\",\"upc\":\"0631234200036\",\"price\":10,\"quantityOnHand\":1,\"createdDate\":null,\"lastUpdatedDate\":null}";
+        webTestClient.put()
+                .uri("/api/v1/beer/" + validBeer.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(beerDtoJson))
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody(Void.class);
+
+    }
+    @Test
     void deleteBeer(){
         doNothing().when(beerService).deleteBeerById(any(UUID.class));
         webTestClient.delete()

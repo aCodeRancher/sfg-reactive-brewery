@@ -80,6 +80,8 @@ public class BeerController {
 
     @PutMapping("beer/{beerId}")
     public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
+
+                beerService.updateBeer(beerId, beerDto);
         return ResponseEntity.noContent().build();
     }
 

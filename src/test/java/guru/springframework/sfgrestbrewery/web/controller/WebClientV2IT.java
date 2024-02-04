@@ -271,4 +271,26 @@ public class WebClientV2IT {
         assertThat(countDownLatch.getCount()).isEqualTo(0);
     }
 
+
+    @Test
+    void testShouldDeleteBeerNotFound() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        webClient.delete().uri(uriBuilder -> uriBuilder.path(BeerRouterConfig.BEER_V2_URL).build(1200))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toBodilessEntity()
+                .flatMap(responseEntity -> {
+                    return Mono.just(responseEntity.getStatusCode());
+                })
+                .subscribe(code -> {
+                    countDownLatch.countDown();
+                    assertThat(code.is4xxClientError());
+                }, throwable -> {
+                    countDownLatch.countDown();
+                });
+
+        countDownLatch.await(1000, TimeUnit.MILLISECONDS);
+        assertThat(countDownLatch.getCount()).isEqualTo(0);
+    }
 }
